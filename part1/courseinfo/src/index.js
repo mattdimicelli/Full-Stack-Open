@@ -2,17 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 const Header = ({course}) => <h1>{course}</h1>
-const Content = ({part1, part2, part3}) => {
+
+const Content = ({parts}) => {
   return(
     <>
-      <Part part={part1} />
-      <Part part={part2} />
-      <Part part={part3} />
+      <Part part={parts[0]} />
+      <Part part={parts[1]} />
+      <Part part={parts[2]} />
   </>
   );
 };
 
-const Footer = ({exercises1, exercises2, exercises3}) => <p>Number of exercises = {exercises1 + exercises2 + exercises3}</p>
+const Footer = ({parts}) => {
+  return(
+    <p>Number of exercises = {parts[0].exercises + parts[1].exercises + parts[2].exercises}</p>
+  )
+};
+
 const Part = ({part}) => {
   const {name, exercises} = part;
   return (
@@ -22,24 +28,26 @@ const Part = ({part}) => {
 
 const App = () => {
   const course = 'Half Stack application development';
-  const part1 = {
-    name: 'Fundamentals of React',
-    exercises: 10,
-  };
-  const part2 = {
-    name: 'Using props to pass data',
-    exercises: 7,
-  };
-  const part3 = {
-    name: 'State of a component',
-    exercises: 14,
-  };
+  const parts = [
+    {
+      name: 'Fundamentals of React',
+      exercises: 10,
+    },
+    {
+      name: 'Using props to pass data',
+      exercises: 7,
+    },
+    {
+      name: 'State of a component',
+      exercises: 14,
+    }
+  ];
 
   return (
     <div>
       <Header course={course} />
-      <Content part1={part1} part2={part2} part3={part3} />
-      <Footer exercises1={part1.exercises} exercises2={part2.exercises} exercises3={part3.exercises} />
+      <Content parts={parts} />
+      <Footer parts={parts} />
     </div>
   );
 }
