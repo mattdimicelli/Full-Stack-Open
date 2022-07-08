@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 
 
 const Statistics = ({good, bad, neutral, all}) => {
-  return (
+  return all === 0 ? 'No feedback given' : (
       <table>
         <caption>statistics</caption>
         <tbody>
