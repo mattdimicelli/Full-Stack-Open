@@ -8,6 +8,7 @@ const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
+  const all = good + bad + neutral
 
   const handleClickGood = () => { setGood(good + 1) };
 
@@ -39,6 +40,18 @@ const App = () => {
           <tr>
             <th>bad</th>
             <td>{bad}</td>
+          </tr>
+          <tr>
+            <th>all</th>
+            <td>{all}</td>
+          </tr>
+          <tr>
+            <th>average</th>
+            <td>{all > 0 ? (good - bad)/all : 'N/A'}</td>
+          </tr>
+          <tr>
+            <th>positive</th>
+            <td>{all > 0 ? (good/all)*100 : 'N/A'}%</td>
           </tr>
         </tbody>
       </table>
