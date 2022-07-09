@@ -4,7 +4,7 @@ import random from 'lodash.random';
 
 
 
-const App = (props) => {
+const App = ({anecdotes}) => {
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState([0,0,0,0,0,0])
   const buttonStyles = { display: 'block' }
@@ -14,15 +14,19 @@ const App = (props) => {
     updated[selected]++;
     setVotes(updated);
   }; 
+  const mostVotedAnecdote = anecdotes[votes.indexOf(Math.max(...votes))];
 
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       <p>
-        {props.anecdotes[selected]}
+        {anecdotes[selected]}
       </p>
       <p>Has {votes[selected]} votes.</p>
       <button style={buttonStyles} onClick={handleClickNext}>Next Anecdote</button>
       <button onClick={handleClickVote}>Vote</button>
+      <h1>Anectode with most votes</h1>
+      <p>{mostVotedAnecdote}</p>
     </div>
   )
 }
