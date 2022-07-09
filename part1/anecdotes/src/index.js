@@ -6,15 +6,23 @@ import random from 'lodash.random';
 
 const App = (props) => {
   const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState([0,0,0,0,0,0])
   const buttonStyles = { display: 'block' }
-  const handleClick = () => setSelected(random(5))
+  const handleClickNext = () => setSelected(random(5))
+  const handleClickVote = () => {
+    const updated = [...votes];
+    updated[selected]++;
+    setVotes(updated);
+  }; 
 
   return (
     <div>
       <p>
         {props.anecdotes[selected]}
       </p>
-      <button style={buttonStyles} onClick={handleClick}>Next Anecdote</button>
+      <p>Has {votes[selected]} votes.</p>
+      <button style={buttonStyles} onClick={handleClickNext}>Next Anecdote</button>
+      <button onClick={handleClickVote}>Vote</button>
     </div>
   )
 }
