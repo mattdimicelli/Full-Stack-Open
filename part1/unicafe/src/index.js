@@ -9,6 +9,9 @@ const Statistic = ({header, value}) => (
 )
 
 const Statistics = ({good, bad, neutral, all}) => {
+  const averageValue = (good - bad)/all
+  const percentPositive = (good/all) * 100
+
   return all === 0 ? 'No feedback given' : (
       <table>
         <caption>statistics</caption>
@@ -17,8 +20,8 @@ const Statistics = ({good, bad, neutral, all}) => {
           <Statistic header='neutral' value={neutral} />
           <Statistic header='bad' value={bad} />
           <Statistic header='all' value={all} />
-          <Statistic header='average' value={all > 0 ? (good - bad)/all : 'N/A'} />
-          <Statistic header='positive' value={`${(all > 0 ? (good/all)*100 : 'N/A')}%`} />
+          <Statistic header='average' value={all > 0 ? averageValue : 'N/A'} />
+          <Statistic header='positive' value={`${(all > 0 ? percentPositive : 'N/A')}%`} />
         </tbody>
       </table>
   )
@@ -31,6 +34,7 @@ const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
+  
   const all = good + bad + neutral
 
   const handleClickGood = () => { setGood(good + 1) };
