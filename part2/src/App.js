@@ -1,62 +1,42 @@
+import {useState} from 'react';
 
-import Course from './components/Course';
+const App = () => {
+  const [ persons, setPersons ] = useState([
+    { name: 'Arto Hellas' }
+  ]) 
+  const [ newName, setNewName ] = useState('')
 
+  const handleSubmit = e => {
+    e.preventDefault();
+    setPersons(persons.concat({ name: newName }));
+    setNewName('');
+  }
 
-const App = () =>  {
-  const courses = [
-    {
-      name: 'Half Stack application development',
-      id: 1,
-      parts: [
-        {
-          name: 'Fundamentals of React',
-          exercises: 10,
-          id: 1,
-        },
-        {
-          name: 'Using props to pass data',
-          exercises: 7,
-          id: 2,
-        },
-        {
-          name: 'State of a component',
-          exercises: 14,
-          id: 3,
-        },
-        {
-          name: 'Redux',
-          exercises: 11,
-          id: 4,
-        },
-      ],
-    },
-    {
-      name: 'Node.js',
-      id: 2,
-      parts: [
-        {
-          name: 'Routing',
-          exercises: 3,
-          id: 1,
-        },
-        {
-          name: 'Middlewares',
-          exercises: 7,
-          id: 2,
-        },
-      ],
-    },
-  ];
+  const handleChange = e => {
+    setNewName(e.currentTarget.value);
+  };
 
-  const coursesList = courses.map(course => <Course key={course.id} course={course} />);
-
+  const ulStyles = { listStyle: 'none' };
 
   return (
-    <>
-    <h1>Web development curriculum</h1>
-      {coursesList}
-    </>
+    <div>
+      <h2>Phonebook</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          name: <input onChange={handleChange} />
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+      <h2>Numbers</h2>
+      <ul style={ulStyles}>
+        { persons.map(person => <li key={person.name}>{person.name}</li>) }
+      </ul>
+    </div>
   )
 }
 
-export default App;
+export default App
+
+
