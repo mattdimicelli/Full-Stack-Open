@@ -1,10 +1,9 @@
 import {useState} from 'react';
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas' }
-  ]) 
-  const [ newName, setNewName ] = useState('')
+  const [ persons, setPersons ] = useState( [{ name: 'Arto Hellas', number: '999-999-9999' }] );
+  const [ newName, setNewName ] = useState('');
+  const [ newNumber, setNewNumber ] = useState('');
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -12,13 +11,13 @@ const App = () => {
       alert(`${newName} is already added to the phone book.`);
       return;
     }
-    setPersons(persons.concat({ name: newName }));
+    setPersons(persons.concat({ name: newName, number: newNumber }));
     setNewName('');
+    setNewNumber('');
   }
 
-  const handleChange = e => {
-    setNewName(e.currentTarget.value);
-  };
+  const handleChangeName = e => { setNewName(e.currentTarget.value); };
+  const handleChangeNumber = e => { setNewNumber(e.currentTarget.value); };
 
   const ulStyles = { listStyle: 'none' };
 
@@ -26,8 +25,13 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <form onSubmit={handleSubmit}>
+        <label>
+          name: <input onChange={handleChangeName} value={newName} />
+        </label>
         <div>
-          name: <input onChange={handleChange} />
+          <label>
+            number: <input onChange={handleChangeNumber} value={newNumber} />
+          </label>
         </div>
         <div>
           <button type="submit">add</button>
