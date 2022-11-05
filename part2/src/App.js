@@ -1,5 +1,30 @@
 import {useState} from 'react';
 
+const Entry = ({name, number}) => {
+  return (
+    <tr>
+      <td>{name}</td>
+      <td>{number}</td>
+    </tr>
+  );
+}
+
+const PhoneDirectory = ({ entries, newSearch }) => {
+  const filtered = entries.filter(entry => entry.name.toLowerCase().includes(newSearch.toLowerCase()));
+  const rows = filtered.map(entry => ( <Entry key={entry.name} name={entry.name} number={entry.number} /> ))
+  return (
+    <table>
+      <tbody>
+        { rows }
+      </tbody>
+    </table>
+  );
+};
+
+const Search = ({ newSearchHandler, newSearchValue }) => (
+  <label>Search: <input onChange={newSearchHandler} value={newSearchValue}></input></label>
+);
+
 const App = () => {
   const [ persons, setPersons ] = useState( [
     { name: 'Arto Hellas', number: '040-123456' },
@@ -26,12 +51,11 @@ const App = () => {
   const handleChangeNumber = e => { setNewNumber(e.currentTarget.value); };
   const handleChangeSearch = e => { setNewSearch(e.currentTarget.value); };
 
-  const filteredResults = persons.filter(person => person.name.toLowerCase().includes(newSearch.toLowerCase()));
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <label>Search: <input onChange={handleChangeSearch} value={newSearch}></input></label>
+      <Search newSearchHandler={handleChangeSearch} newSearchValue={newSearch} />
       <form onSubmit={handleSubmit}>
         <label>name: <input onChange={handleChangeName} value={newName} /> </label>
         <div><label>number: <input onChange={handleChangeNumber} value={newNumber} /> </label> </div>
@@ -40,13 +64,7 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      <table>
-        { filteredResults.map(entry => (
-          <tr key={entry.name}>
-            <td>{entry.name}</td>
-            <td>{entry.number}</td>
-          </tr>)) }
-      </table>
+      <PhoneDirectory entries={persons} newSearch={newSearch} />
     </div>
   )
 }
