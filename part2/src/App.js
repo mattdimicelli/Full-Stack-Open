@@ -1,74 +1,44 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Entry = ({name, number}) => {
+const Country = () => {};
+
+const Information = countries => {
+  console.log(countries);
+  let display;
+  if (countries.length > 10) {
+    display = <p>Too many matches, specify another filter</p>;
+  }
+  else if (countries.length > 1 && countries.length <= 10) {
+    // display = // to do;
+  }
+  else if (countries.length === 1) {
+    display = <Country />
+  }
   return (
-    <tr>
-      <td>{name}</td>
-      <td>{number}</td>
-    </tr>
+    display
   );
 }
 
-const PhoneDirectory = ({ entries, newSearch }) => {
-  const filtered = entries.filter(entry => entry.name.toLowerCase().includes(newSearch.toLowerCase()));
-  const rows = filtered.map(entry => ( <Entry key={entry.name} name={entry.name} number={entry.number} /> ))
-  return (
-    <table>
-      <tbody>
-        { rows }
-      </tbody>
-    </table>
-  );
-};
-
-const Search = ({ newSearchHandler, newSearchValue }) => (
-  <label>Search: <input onChange={newSearchHandler} value={newSearchValue}></input></label>
-);
-
 const App = () => {
-  const [ persons, setPersons ] = useState([]);
-  const [ newName, setNewName ] = useState('');
-  const [ newNumber, setNewNumber ] = useState('');
-  const [ newSearch, setNewSearch ] = useState('');
+
+  const [search, setSearch] = useState('');
+  const [countries, setCountries] = useState([]);
+
+  const onChangeSearch = e => setSearch(e.currentTarget.value);
 
   useEffect(() => {
-    console.log('boom')
-    axios.get('http://localhost:3001/persons')
-    .then(res=> setPersons(res.data));
+    axios.get('https://restcountries.com/v3.1/all')
+    .then(res => setCountries(res.data));
   }, []);
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    if (persons.find(person => person.name === newName)) {
-      alert(`${newName} is already added to the phone book.`);
-      return;
-    }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
-    setNewName('');
-    setNewNumber('');
-  }
-
-  const handleChangeName = e => { setNewName(e.currentTarget.value); };
-  const handleChangeNumber = e => { setNewNumber(e.currentTarget.value); };
-  const handleChangeSearch = e => { setNewSearch(e.currentTarget.value); };
-
-
   return (
-    <div>
-      <h2>Phonebook</h2>
-      <Search newSearchHandler={handleChangeSearch} newSearchValue={newSearch} />
-      <form onSubmit={handleSubmit}>
-        <label>name: <input onChange={handleChangeName} value={newName} /> </label>
-        <div><label>number: <input onChange={handleChangeNumber} value={newNumber} /> </label> </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      <PhoneDirectory entries={persons} newSearch={newSearch} />
-    </div>
-  )
+    <>
+      <label>Find countries: <input type="search" value={search} onChange={onChangeSearch} /></label>
+      <Information countries={countries} /> 
+    </>
+    
+  );
 }
 
 export default App
