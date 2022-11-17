@@ -2,7 +2,19 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Country = ({country}) => {
-  console.log(country)
+  const [showInfo, setShowInfo] = useState(false);
+  let display = showInfo ? 
+  <CountryInfo country={country} />
+  :
+    <div>
+      <span key={country.name.common}>{country.name.common}</span>
+      <button onClick={() => setShowInfo(!showInfo)}>Show Info</button>
+    </div>
+  ;
+  return display;
+};
+
+const CountryInfo = ({country}) => {
   return (
     <>
       <h1>{country.name.common}</h1>
@@ -38,10 +50,10 @@ const Information = ({searchResults}) => {
     display = <p>Too many matches, specify another filter</p>;
   }
   else if (searchResults.length > 1 && searchResults.length <= 10) {
-    display = searchResults.map(country => <p key={country.name.common}>{country.name.common}</p>) 
+    display = searchResults.map(country => <Country key={country.name.common} country={country} />);
   }
   else if (searchResults.length === 1) {
-    display = <Country country={searchResults[0]} />
+    display = <CountryInfo country={searchResults[0]} />
   }
   return (
     display
