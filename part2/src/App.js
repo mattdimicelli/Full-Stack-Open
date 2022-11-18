@@ -15,11 +15,11 @@ const Country = ({country}) => {
 };
 
 const CountryInfo = ({country}) => {
-  const [capitalWeatherData, setCapitalWeatherData] = useState(undefined);
+  const [capitalWeatherData, setCapitalWeatherData] = useState('');
 
   useEffect(() => {
-    const response = axios.get(`http://api.weatherstack.com/current?access_key=${process.env.WEATHER_STACK_API_KEY}&query=${country.capital[0]}`);
-    setCapitalWeatherData(response);
+    axios.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_WEATHER_STACK_API_KEY}&query=${country.capital[0]}`)
+          .then(res => setCapitalWeatherData(res.data.current));
   }, []);
   
   return (
@@ -49,9 +49,10 @@ const CountryInfo = ({country}) => {
       </figure>
       <article>
         <h2>Weather in {country.capital[0]}</h2>
-        <p>Temperature: Celcius</p>
-        <img />
-        <p>Wind: mph direction</p>
+        <p>Temperature: {capitalWeatherData.temperature} Celcius</p>
+        {capitalWeatherData.weather_icons?.map((icon, index) => <img src={icon} key={icon} alt={capitalWeatherData.weather_descriptions[index]} /> )}
+        
+        <p>Wind: {capitalWeatherData.wind_speed} mph direction {capitalWeatherData.wind_dir}</p>
       </article>
       
 
