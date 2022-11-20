@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import directoryService from './services/directory.js';
 
 const Entry = ({name, number}) => {
   return (
@@ -33,8 +34,8 @@ const App = () => {
   const [ newSearch, setNewSearch ] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-    .then(res=> setPersons(res.data));
+    directoryService.getAllEntries()
+    .then(setPersons);
   }, []);
 
   const handleSubmit = e => {
@@ -43,8 +44,8 @@ const App = () => {
       alert(`${newName} is already added to the phone book.`);
       return;
     }
-    axios.post('http://localhost:3001/persons', { name: newName, number: newNumber })
-    .then(res => setPersons(persons.concat(res.data)));
+    directoryService.newEntry({ name: newName, number: newNumber })
+    .then(entry => setPersons(persons.concat(entry)));
     setNewName('');
     setNewNumber('');
   }
