@@ -33,7 +33,6 @@ const App = () => {
   const [ newSearch, setNewSearch ] = useState('');
 
   useEffect(() => {
-    console.log('boom')
     axios.get('http://localhost:3001/persons')
     .then(res=> setPersons(res.data));
   }, []);
@@ -44,7 +43,8 @@ const App = () => {
       alert(`${newName} is already added to the phone book.`);
       return;
     }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
+    axios.post('http://localhost:3001/persons', { name: newName, number: newNumber })
+    .then(res => setPersons(persons.concat(res.data)));
     setNewName('');
     setNewNumber('');
   }
