@@ -9,4 +9,6 @@ const newEntry = (entry) => {
     return axios.post(URL, entry).then(res => res.data);
 }
 
-export default { getAllEntries, newEntry };
+const deleteEntry = id => axios.delete(URL + `/${id}`).then(res => res.data);
+
+export default { getAllEntries, newEntry, deleteEntry };
