@@ -40,8 +40,16 @@ const App = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (entries.find(entry => entry.name === newName)) {
-      alert(`${newName} is already added to the phone book.`);
+    const duplicateEntry = entries.find(entry => entry.name === newName);
+    if (duplicateEntry) {
+      if (window.confirm(`${newName} is already in the phonebook. Replace the old number with a new
+      one?`)) {
+        directoryService.updateEntry({ ...duplicateEntry, number: newNumber })
+        .then(updatedEntry => setEntries(entries.map(entry => entry.id !== updatedEntry.id ? entry:  updatedEntry)));
+        setNewName('');
+        setNewNumber('');
+        return;
+      }
       return;
     }
     directoryService.newEntry({ name: newName, number: newNumber })
