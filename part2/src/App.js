@@ -27,11 +27,26 @@ const Search = ({ newSearchHandler, newSearchValue }) => (
   <label>Search: <input onChange={newSearchHandler} value={newSearchValue}></input></label>
 );
 
+const Notification = ({ message }) => {
+  const success  = { 
+    color: 'green', 
+    background: 'lightgrey', 
+    fontSize: 20, 
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  };
+
+  return message === undefined ? null : <div style={success}>{message}</div>;
+} 
+
 const App = () => {
   const [ entries, setEntries ] = useState([]);
   const [ newName, setNewName ] = useState('');
   const [ newNumber, setNewNumber ] = useState('');
   const [ newSearch, setNewSearch ] = useState('');
+  const [ message, setMessage ] = useState(undefined);
 
   useEffect(() => {
     directoryService.getAllEntries()
@@ -46,6 +61,8 @@ const App = () => {
       one?`)) {
         directoryService.updateEntry({ ...duplicateEntry, number: newNumber })
         .then(updatedEntry => setEntries(entries.map(entry => entry.id !== updatedEntry.id ? entry:  updatedEntry)));
+        setMessage(`${newName}'s phone number updated`);
+        setTimeout(() => setMessage(undefined), 5000);
         setNewName('');
         setNewNumber('');
         return;
@@ -54,6 +71,8 @@ const App = () => {
     }
     directoryService.newEntry({ name: newName, number: newNumber })
     .then(entry => setEntries(entries.concat(entry)));
+    setMessage(`${newName} successfully added`);
+    setTimeout(() => setMessage(undefined), 5000);
     setNewName('');
     setNewNumber('');
   }
@@ -73,7 +92,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Search newSearchHandler={handleChangeSearch} newSearchValue={newSearch} />
+      <h3>Add Entry</h3>
       <form onSubmit={handleSubmit}>
         <label>Enter name: <input onChange={handleChangeName} value={newName} /> </label>
         <div><label>Enter number: <input onChange={handleChangeNumber} value={newNumber} /> </label> </div>

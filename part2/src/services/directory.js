@@ -12,7 +12,6 @@ const newEntry = (entry) => {
 const deleteEntry = id => axios.delete(URL + `/${id}`).then(res => res.data);
 
 const updateEntry = (updatedEntry) => {
-    console.log(updatedEntry.id);
     return axios.put(URL + `/${updatedEntry.id}`, updatedEntry)
     .then(res => res.data);
 };
