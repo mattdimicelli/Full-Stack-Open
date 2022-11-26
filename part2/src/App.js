@@ -28,8 +28,8 @@ const Search = ({ newSearchHandler, newSearchValue }) => (
 );
 
 const Notification = ({ message }) => {
-  const success  = { 
-    color: 'green', 
+  const { success, text } = message;
+  let style = { 
     background: 'lightgrey', 
     fontSize: 20, 
     borderStyle: 'solid',
@@ -37,8 +37,15 @@ const Notification = ({ message }) => {
     padding: 10,
     marginBottom: 10,
   };
+  if (!success) {
+    style.color = 'red';
+  } 
+  else if (success) {
+    style.color = 'green';
+  }
 
-  return message === undefined ? null : <div style={success}>{message}</div>;
+
+  return text === '' ? null : <div style={style}>{text}</div>;
 } 
 
 const App = () => {
@@ -46,7 +53,7 @@ const App = () => {
   const [ newName, setNewName ] = useState('');
   const [ newNumber, setNewNumber ] = useState('');
   const [ newSearch, setNewSearch ] = useState('');
-  const [ message, setMessage ] = useState(undefined);
+  const [ message, setMessage ] = useState({ text: '', success: true });
 
   useEffect(() => {
     directoryService.getAllEntries()
@@ -55,24 +62,31 @@ const App = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
+
     const duplicateEntry = entries.find(entry => entry.name === newName);
     if (duplicateEntry) {
       if (window.confirm(`${newName} is already in the phonebook. Replace the old number with a new
       one?`)) {
         directoryService.updateEntry({ ...duplicateEntry, number: newNumber })
-        .then(updatedEntry => setEntries(entries.map(entry => entry.id !== updatedEntry.id ? entry:  updatedEntry)));
-        setMessage(`${newName}'s phone number updated`);
-        setTimeout(() => setMessage(undefined), 5000);
+        .then(updatedEntry => setEntries(entries.map(entry => entry.id !== updatedEntry.id ? entry:  updatedEntry)))
+        .catch(err => {
+          if (err.response.status === 404) {
+            setMessage({ text: `${newName}'s information has already been removed from the server`, success: false });
+          }
+        });
+        setMessage({text: `${newName}'s phone number updated`, success: false });
+        setTimeout(() => setMessage({ text: '', success: true }), 5000);
         setNewName('');
         setNewNumber('');
         return;
       }
       return;
     }
+    
     directoryService.newEntry({ name: newName, number: newNumber })
     .then(entry => setEntries(entries.concat(entry)));
-    setMessage(`${newName} successfully added`);
-    setTimeout(() => setMessage(undefined), 5000);
+    setMessage({ text: `${newName} successfully added`, success: true });
+    setTimeout(() => setMessage({ text: '', success: true }), 5000);
     setNewName('');
     setNewNumber('');
   }
