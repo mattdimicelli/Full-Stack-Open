@@ -1,107 +1,125 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import directoryService from './services/directory.js';
 
-const Country = ({country}) => {
-  const [showInfo, setShowInfo] = useState(false);
-  let display = showInfo ? 
-  <CountryInfo country={country} />
-  :
-    <div>
-      <span key={country.name.common}>{country.name.common}</span>
-      <button onClick={() => setShowInfo(!showInfo)}>Show Info</button>
-    </div>
-  ;
-  return display;
-};
-
-const CountryInfo = ({country}) => {
-  const [capitalWeatherData, setCapitalWeatherData] = useState('');
-
-  useEffect(() => {
-    axios.get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_WEATHER_STACK_API_KEY}&query=${country.capital[0]}`)
-          .then(res => setCapitalWeatherData(res.data.current));
-  }, []);
-  
+const Entry = ({name, number, entryId, handleDelete}) => {
   return (
-    <>
-      <h1>{country.name.common}</h1>
-      <table>
-        <tbody>
-          <tr>
-            <th>Capital: </th>
-            {country.capital.map(capital => <td key={capital}>{capital}</td>)}
-          </tr>
-          <tr>
-            <th>Population: </th>
-            <td>{country.population}</td>
-          </tr>
-        </tbody>
-      </table>
-      <figure>
-        <figcaption>Languages</figcaption>
-        <ul>
-          {Object.entries(country.languages).map(([k,v]) => {
-          return(
-          <li key={k}>{v}</li>
-          ) 
-        })}
-        </ul>
-      </figure>
-      <article>
-        <h2>Weather in {country.capital[0]}</h2>
-        <p>Temperature: {capitalWeatherData.temperature} Celcius</p>
-        {capitalWeatherData.weather_icons?.map((icon, index) => <img src={icon} key={icon} alt={capitalWeatherData.weather_descriptions[index]} /> )}
-        
-        <p>Wind: {capitalWeatherData.wind_speed} mph direction {capitalWeatherData.wind_dir}</p>
-      </article>
-      
-
-    </>
-  )
-};
-
-const Information = ({searchResults}) => {
-  let display;
-  if (searchResults.length > 10) {
-    display = <p>Too many matches, specify another filter</p>;
-  }
-  else if (searchResults.length > 1 && searchResults.length <= 10) {
-    display = searchResults.map(country => <Country key={country.name.common} country={country} />);
-  }
-  else if (searchResults.length === 1) {
-    display = <CountryInfo country={searchResults[0]} />
-  }
-  return (
-    display
+    <tr>
+      <td>{name}</td>
+      <td>{number}</td>
+      <td><button onClick={() => handleDelete(entryId)}>Delete</button></td>
+    </tr>
   );
 }
 
-const App = () => {
+const PhoneDirectory = ({ entries, newSearch, handleDelete }) => {
+  const filtered = entries.filter(entry => entry.name.toLowerCase().includes(newSearch.toLowerCase()));
+  const rows = filtered.map(entry => ( <Entry key={entry.id} name={entry.name} number={entry.number} entryId={entry.id} handleDelete={handleDelete} /> ))
+  return (
+    <table>
+      <tbody>
+        { rows }
+      </tbody>
+    </table>
+  );
+};
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [countriesData, setCountriesData] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
+const Search = ({ newSearchHandler, newSearchValue }) => (
+  <label>Search: <input onChange={newSearchHandler} value={newSearchValue}></input></label>
+);
 
-  const onChangeSearch = e => {
-    setSearchQuery(e.currentTarget.value);
-    let matches = countriesData.filter(country =>  {
-      return country.name.common.toLowerCase().includes(e.currentTarget.value.toLowerCase()) || country.name.official.toLowerCase().includes(e.currentTarget.value.toLowerCase());
-    });
-    setSearchResults(matches);
+const Notification = ({ message }) => {
+  const { success, text } = message;
+  let style = { 
+    background: 'lightgrey', 
+    fontSize: 20, 
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
   };
+  if (!success) {
+    style.color = 'red';
+  } 
+  else if (success) {
+    style.color = 'green';
+  }
+
+
+  return text === '' ? null : <div style={style}>{text}</div>;
+} 
+
+const App = () => {
+  const [ entries, setEntries ] = useState([]);
+  const [ newName, setNewName ] = useState('');
+  const [ newNumber, setNewNumber ] = useState('');
+  const [ newSearch, setNewSearch ] = useState('');
+  const [ message, setMessage ] = useState({ text: '', success: true });
 
   useEffect(() => {
-    axios.get('https://restcountries.com/v3.1/all')
-    .then(res => setCountriesData(res.data));
+    directoryService.getAllEntries()
+    .then(setEntries);
   }, []);
 
-  return (
-    <>
-      <label>Find countries: <input type="search" value={searchQuery} onChange={onChangeSearch} /></label>
-      <Information searchResults={searchResults} /> 
-    </>
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    const duplicateEntry = entries.find(entry => entry.name === newName);
+    if (duplicateEntry) {
+      if (window.confirm(`${newName} is already in the phonebook. Replace the old number with a new
+      one?`)) {
+        directoryService.updateEntry({ ...duplicateEntry, number: newNumber })
+        .then(updatedEntry => setEntries(entries.map(entry => entry.id !== updatedEntry.id ? entry:  updatedEntry)))
+        .catch(err => {
+          if (err.response.status === 404) {
+            setMessage({ text: `${newName}'s information has already been removed from the server`, success: false });
+          }
+        });
+        setMessage({text: `${newName}'s phone number updated`, success: false });
+        setTimeout(() => setMessage({ text: '', success: true }), 5000);
+        setNewName('');
+        setNewNumber('');
+        return;
+      }
+      return;
+    }
     
-  );
+    directoryService.newEntry({ name: newName, number: newNumber })
+    .then(entry => setEntries(entries.concat(entry)));
+    setMessage({ text: `${newName} successfully added`, success: true });
+    setTimeout(() => setMessage({ text: '', success: true }), 5000);
+    setNewName('');
+    setNewNumber('');
+  }
+
+  const handleChangeName = e => { setNewName(e.currentTarget.value); };
+  const handleChangeNumber = e => { setNewNumber(e.currentTarget.value); };
+  const handleChangeSearch = e => { setNewSearch(e.currentTarget.value); };
+  const handleDelete = (id) => {
+    if (window.confirm('Delete this entry?')) {
+      directoryService.deleteEntry(id)
+      .then(entry => { setEntries(entries.filter(entry => entry.id !== id))})
+      .catch(err => console.error(err));
+    }
+  };
+
+
+  return (
+    <div>
+      <h2>Phonebook</h2>
+      <Notification message={message} />
+      <Search newSearchHandler={handleChangeSearch} newSearchValue={newSearch} />
+      <h3>Add Entry</h3>
+      <form onSubmit={handleSubmit}>
+        <label>Enter name: <input onChange={handleChangeName} value={newName} /> </label>
+        <div><label>Enter number: <input onChange={handleChangeNumber} value={newNumber} /> </label> </div>
+        <div>
+          <button type="submit">Add</button>
+        </div>
+      </form>
+      <h2>Results</h2>
+      <PhoneDirectory entries={entries} newSearch={newSearch} handleDelete={handleDelete} />
+    </div>
+  )
 }
 
 export default App
